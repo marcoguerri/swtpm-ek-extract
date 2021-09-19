@@ -1,8 +1,8 @@
 # swtpm Docker container
 
-Docker container which allows to run `swtpm`, exporting server and control sockets to the outside.
+Docker container which allows to run `swtpm`, exporting server and control sockets externally.
 Execute `/home/swtpm/init.sh` to start `swtpm` instance with socket interface bound to localhost
-and create a `socat` tunnel which can be reached from outside after exporting server and control ports.
+and create a `socat` tunnel which can be reachable from outside after exporting server and control ports.
 
 
 # Usage
