@@ -8,35 +8,23 @@ RUN apt-get install -y \
         git \
         gcc \
         libtool \
-        uuid-dev \
         libssl-dev \
         openssl \
         libtasn1-6 \
         libtasn1-6-dev \
-        python3-setuptools \
-        python3-cryptography \
         libseccomp-dev \
-        gawk  \
         make \
-        python3 \
-        python2 \
-        nasm \
-        iasl \
-        vim \
         autoconf \
         automake \
-        iproute2 \
-        expect \
         socat \
-        procps \
-        python-pip \
-        python-setuptools \
         pkg-config \
         m4 \
         autoconf-archive \
         libjson-c-dev \
         libcurl4-openssl-dev \
         libjson-glib-dev \
+        expect \
+        gawk \
         sudo
 
 RUN echo "swtpm ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
