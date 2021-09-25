@@ -29,9 +29,6 @@ RUN apt-get install -y \
 
 RUN echo "swtpm ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN ln -s /usr/sbin/useradd /usr/bin/useradd
-RUN ln -s /usr/sbin/groupadd /usr/bin/groupadd
-
 USER swtpm
 
 WORKDIR /home/swtpm
@@ -43,7 +40,6 @@ RUN git clone https://github.com/stefanberger/libtpms && \
     make && \
     sudo make install
 
-
 RUN git clone https://github.com/stefanberger/swtpm && \
     cd swtpm && \
     ./autogen.sh && \
@@ -51,8 +47,6 @@ RUN git clone https://github.com/stefanberger/swtpm && \
     make && \
     sudo make install
 
-RUN ls
-COPY init.sh /home/swtpm/init.sh
-RUN sudo chmod a+x /home/swtpm/init.sh
-
-ENTRYPOINT /home/swtpm/init.sh
+COPY init.sh .
+RUN sudo chmod a+x init.sh
+ENTRYPOINT ./init.sh
