@@ -59,3 +59,37 @@ TPM2_PT_NV_WRITE_RECOVERY: 0x0
 TPM2_PT_AUDIT_COUNTER_0: 0x0
 TPM2_PT_AUDIT_COUNTER_1: 0x0
 ```
+
+swtpm will show corresponding incoming commands and responses:
+```
+$ sudo docker run -p 2322:2322 -p 2323:2323 -ti swtpm
+[sudo] password for marcoguerri: 
+ Ctrl Cmd: length 5
+ 00 00 00 05 00 
+ Ctrl Rsp: length 4
+ 00 00 00 00 
+ SWTPM_IO_Read: length 12
+ 80 01 00 00 00 0C 00 00 01 44 00 00 
+ SWTPM_IO_Write: length 10
+ 80 01 00 00 00 0A 00 00 00 00 
+ Ctrl Cmd: length 5
+ 00 00 00 05 00 
+ Ctrl Rsp: length 4
+ 00 00 00 00 
+ SWTPM_IO_Read: length 22
+ 80 01 00 00 00 16 00 00 01 7A 00 00 00 06 00 00 
+ 02 00 00 00 00 7F 
+ SWTPM_IO_Write: length 187
+ 80 01 00 00 00 BB 00 00 00 00 00 00 00 00 06 00 
+ 00 00 15 00 00 02 00 00 00 04 00 00 00 02 01 80 
+ 00 00 0F 00 00 02 02 00 00 00 00 00 00 02 03 00 
+ 00 00 00 00 00 02 04 00 00 00 03 00 00 02 05 00 
+ 00 00 00 00 00 02 06 00 00 00 40 00 00 02 07 00 
+ 00 00 03 00 00 02 08 00 00 00 00 00 00 02 09 00 
+ 00 00 41 00 00 02 0A 00 00 00 00 00 00 02 0B 00 
+ 00 00 19 00 00 02 0C 00 00 00 00 00 00 02 0D 00 
+ 00 00 08 00 00 02 0E 00 00 00 00 00 00 02 0F 00 
+ 00 00 03 00 00 02 10 00 00 03 E8 00 00 02 11 00 
+ 00 03 E8 00 00 02 12 00 00 00 00 00 00 02 13 00 
+ 00 00 00 00 00 02 14 00 00 00 00
+```
