@@ -39,25 +39,7 @@ TPM2_PT_STARTUP_CLEAR:
   phEnableNV:                1
   reserved1:                 0
   orderly:                   1
-TPM2_PT_HR_NV_INDEX: 0x0
-TPM2_PT_HR_LOADED: 0x0
-TPM2_PT_HR_LOADED_AVAIL: 0x3
-TPM2_PT_HR_ACTIVE: 0x0
-TPM2_PT_HR_ACTIVE_AVAIL: 0x40
-TPM2_PT_HR_TRANSIENT_AVAIL: 0x3
-TPM2_PT_HR_PERSISTENT: 0x0
-TPM2_PT_HR_PERSISTENT_AVAIL: 0x41
-TPM2_PT_NV_COUNTERS: 0x0
-TPM2_PT_NV_COUNTERS_AVAIL: 0x19
-TPM2_PT_ALGORITHM_SET: 0x0
-TPM2_PT_LOADED_CURVES: 0x8
-TPM2_PT_LOCKOUT_COUNTER: 0x0
-TPM2_PT_MAX_AUTH_FAIL: 0x3
-TPM2_PT_LOCKOUT_INTERVAL: 0x3E8
-TPM2_PT_LOCKOUT_RECOVERY: 0x3E8
-TPM2_PT_NV_WRITE_RECOVERY: 0x0
-TPM2_PT_AUDIT_COUNTER_0: 0x0
-TPM2_PT_AUDIT_COUNTER_1: 0x0
+[...]
 ```
 
 swtpm will show corresponding incoming commands and responses:
@@ -93,3 +75,17 @@ $ sudo docker run -p 2322:2322 -p 2323:2323 -ti swtpm
  00 03 E8 00 00 02 12 00 00 00 00 00 00 02 13 00 
  00 00 00 00 00 02 14 00 00 00 00
 ```
+
+swtpm uses two ports for communication, which are assumed to be at consecutive numbers.
+
+
+We can then create an Endorsement Key:
+```
+tpm2_createek -G rsa -c 0x81010002
+```
+
+We can then read the public area at the handle specified:
+```
+tpm2_readpublic -c 0x81010002 -o ek.pub -f pem
+```
+

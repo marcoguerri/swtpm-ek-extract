@@ -38,34 +38,6 @@ int main() {
     PERSISTENT_DATA pd;
     PERSISTENT_ALL_Unmarshal(&bBuffer, &size, &pd);
 
-    // Read the TPMT_PUBLIC structure representing the endorsement key
-    TPM2B_PUBLIC publicArea;
-    char publicAreaBuffer[BUF_SIZE];
-    BYTE *ptrPa = (BYTE*)publicAreaBuffer;
-
-    ifstream publicAreaStream;
-    publicAreaStream.open("ek.pub.tss");
-    if (publicAreaStream.fail()) {
-        std::cout << "Could not read ek.pub.tss" << std::endl;
-        return -1;
-    }
-
-    publicAreaStream.seekg (0, publicAreaStream.end);
-    int lengthPublicArea = publicAreaStream.tellg();
-    publicAreaStream.seekg (0, publicAreaStream.beg);
-    if (lengthPublicArea == 0 || lengthPublicArea > BUF_SIZE) {
-        std::cout << "Buffer length (" << BUF_SIZE << ") not sufficient for public key area length (" << length << ")" << std::endl;
-        return -1;
-    }
-
-    publicAreaStream.read(publicAreaBuffer, lengthPublicArea);
-    int sizeUnmarshal = lengthPublicArea;
-    TPM_RC rc = TPM2B_PUBLIC_Unmarshal(&publicArea, &ptrPa , &sizeUnmarshal, FALSE);
-    if (rc != TPM_RC_SUCCESS) {
-        std::cout << "TPM2B_PUBLIC_Unmarshal filed" << std::endl;
-        return -1;
-    }
-
     // Define the default TPM2B_PUBLIC content as specified by TCG specs
     // EK Profile template: https://github.com/tpm2-software/tpm2-tools/issues/2710
     TPM2B_PUBLIC referencePublic;
@@ -95,8 +67,7 @@ int main() {
 
     DRBG_STATE rand;
     TPM2B_NAME name;
-
-    rc = DRBG_InstantiateSeeded(
+    TPM_RC rc = DRBG_InstantiateSeeded(
         &rand,
         &pd.EPSeed.b,
         PRIMARY_OBJECT_CREATION,
