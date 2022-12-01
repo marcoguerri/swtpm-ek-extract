@@ -1,0 +1,143 @@
+From 66541f5a3066d30df99c669091962f707115baf0 Mon Sep 17 00:00:00 2001
+From: Marco Guerri <marco.guerri.dev@fastmail.com>
+Date: Thu, 1 Dec 2022 23:44:59 +0100
+Subject: [PATCH] Modify libtpms to export some symbols
+
+---
+ src/libtpms.syms            | 22 +++++++++++++++++++++-
+ src/tpm2/LibtpmsCallbacks.c |  2 +-
+ src/tpm2/NVMarshal.c        |  5 ++++-
+ src/tpm2/NVMarshal.h        |  2 +-
+ src/tpm2/Platform_fp.h      |  2 +-
+ src/tpm_tpm2_interface.c    |  6 +++---
+ 6 files changed, 31 insertions(+), 8 deletions(-)
+
+diff --git a/src/libtpms.syms b/src/libtpms.syms
+index e385192..9166e5a 100644
+--- a/src/libtpms.syms
++++ b/src/libtpms.syms
+@@ -17,7 +17,27 @@ LIBTPMS_0.5.1 {
+ 	TPM_Free;
+ 	TPM_Malloc;
+ 	TPM_Realloc;
+-    local:
++    PERSISTENT_ALL_Unmarshal;
++    CryptRsaGenerateKey;
++    TPM_PrintAll;
++    TPMLIB_LogPrintf;
++    BnSetWord;
++    BnInit;
++    ComputePrivateExponent;
++    BnFrom2B;
++    BnDiv;
++    BnMult;
++    BnCopy;
++    BnSub;
++    BnAddWord;
++    BnModInverse;
++    BnToBytes;
++    BnSizeInBits;
++    TPM2B_PUBLIC_Unmarshal;
++    PublicMarshalAndComputeName;
++    DRBG_InstantiateSeeded;
++    PRIMARY_OBJECT_CREATION;
++    local: 
+ 	*;
+ };
+ 
+diff --git a/src/tpm2/LibtpmsCallbacks.c b/src/tpm2/LibtpmsCallbacks.c
+index 5d22147..6c31f03 100644
+--- a/src/tpm2/LibtpmsCallbacks.c
++++ b/src/tpm2/LibtpmsCallbacks.c
+@@ -92,7 +92,7 @@ libtpms_plat__NVEnable(void)
+         unsigned char *buffer = data;
+         INT32 size = length;
+ 
+-        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
++        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size, NULL);
+         free(data);
+         if (rc != TPM_RC_SUCCESS)
+             return -1;
+diff --git a/src/tpm2/NVMarshal.c b/src/tpm2/NVMarshal.c
+index 741f9cd..0ead759 100644
+--- a/src/tpm2/NVMarshal.c
++++ b/src/tpm2/NVMarshal.c
+@@ -4832,7 +4832,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
+ }
+ 
+ TPM_RC
+-PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
++PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size, PERSISTENT_DATA *pdPtr)
+ {
+     TPM_RC rc = TPM_RC_SUCCESS;
+     NV_HEADER hdr;
+@@ -4860,6 +4860,9 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
+     }
+     if (rc == TPM_RC_SUCCESS) {
+         rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
++        if (pdPtr != NULL) {
++            *pdPtr = pd;
++        }
+     }
+     if (rc == TPM_RC_SUCCESS) {
+         if (hdr.version < 3) {
+diff --git a/src/tpm2/NVMarshal.h b/src/tpm2/NVMarshal.h
+index 92a74fb..116599e 100644
+--- a/src/tpm2/NVMarshal.h
++++ b/src/tpm2/NVMarshal.h
+@@ -50,7 +50,7 @@ UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
+ TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
+ 
+ UINT32 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size);
+-TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size);
++TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size, PERSISTENT_DATA *pdPtr);
+ 
+ void NVShadowRestore(void);
+ 
+diff --git a/src/tpm2/Platform_fp.h b/src/tpm2/Platform_fp.h
+index 4bc7cd4..069ec76 100644
+--- a/src/tpm2/Platform_fp.h
++++ b/src/tpm2/Platform_fp.h
+@@ -210,7 +210,7 @@ _plat__NVEnable_NVChipFile(
+ /* Disable NV memory */
+ LIB_EXPORT void
+ _plat__NVDisable(
+-		 int             delete           // IN: If TRUE, delete the NV contents.
++		 int             _delete           // IN: If TRUE, delete the NV contents.
+ 		 );
+ /* C.8.6.4. _plat__IsNvAvailable() */
+ /* Check if NV is available */
+diff --git a/src/tpm_tpm2_interface.c b/src/tpm_tpm2_interface.c
+index dd2fe3d..8454ee5 100644
+--- a/src/tpm_tpm2_interface.c
++++ b/src/tpm_tpm2_interface.c
+@@ -532,7 +532,7 @@ static TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
+ 
+         buffer = data;
+         size = length;
+-        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
++        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size, NULL);
+         free(data);
+     }
+ 
+@@ -640,7 +640,7 @@ static TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
+     if (ret == TPM_SUCCESS) {
+         switch (st) {
+         case TPMLIB_STATE_PERMANENT:
+-            rc = PERSISTENT_ALL_Unmarshal(&stream, &stream_size);
++            rc = PERSISTENT_ALL_Unmarshal(&stream, &stream_size, NULL);
+             break;
+         case TPMLIB_STATE_VOLATILE:
+             /* load permanent state first */
+@@ -648,7 +648,7 @@ static TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
+                                &permanent, (uint32_t *)&permanent_len);
+             if (rc == TPM_RC_SUCCESS) {
+                 ptr = permanent;
+-                rc = PERSISTENT_ALL_Unmarshal(&ptr, &permanent_len);
++                rc = PERSISTENT_ALL_Unmarshal(&ptr, &permanent_len, NULL);
+                 if (rc == TPM_RC_SUCCESS)
+                     rc = VolatileState_Load(&stream, &stream_size);
+             }
+-- 
+2.31.1
+
