@@ -2,10 +2,9 @@
 
 `ek_extract.cpp` rebuilds swtpm endorsement key from its state file (by default called `tpm2-00.permall`). The endorsement key
 is derived from a seed calculated based on the TPM endorsement hierarchy primary seed, which swtpm stores in the state file.
-`ek_extract.cpp` unmarshals the content of `tpm2-00.permall` and `TPMT_PUBLIC` structure corresponding to the Endorsement Key. 
-`TPMT_PUBLIC` contribution is necessary because TPM key derivation depends also on the name of the key, which is a hash over 
-the serialization of the `TPMT_PUBLIC` structure. Within `TPMT_PUBLIC`, the initial value of `unique` (the public key bytes)
-is zero.
+`ek_extract.cpp` unmarshals the content of `tpm2-00.permall` and builds `TPMT_PUBLIC` object based on TCG default template 
+to calculate the name of the key and feeds the result into the key derivation process. Within `TPMT_PUBLIC`, the initial value 
+of `unique` (the public key bytes) is zero.
 
 The code needs to be compiled against `libtpms` with two amendments:
 * Some symbols need to be exported to be linked against. This can be done through `src/libtpms.syms`, by setting the following symbols as non-local:
