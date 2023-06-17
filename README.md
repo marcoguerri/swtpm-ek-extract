@@ -1,6 +1,14 @@
+This repository contains a Docker configuration file to deploy `swtpm` in container and 
+a C application to extract private portion of TPM EK from `swtpm` state file. See the 
+corresponding [README for more information](https://github.com/marcoguerri/swtpm-ek-extract/blob/main/ek/README.md).
+
+Why would one want to extract the private counterpart of TPM Endorsement Key? Few possible reasons are the following:
+* Purely for educational purposes, e.g. implementing crypto operations natively and comparing the results with swtpm
+* To debug unexpected results obtained from swtpm
+
 # swtpm Docker container
 
-Docker container which allows to run `swtpm`, exporting server and control sockets externally.
+The Docker container allows to run `swtpm`, exporting server and control sockets to the host
 Execute `/home/swtpm/init.sh` to start `swtpm` instance with socket interface bound to localhost
 and create a `socat` tunnel which can be reachable from outside after exporting server and control ports.
 
@@ -89,3 +97,5 @@ We can then read the public area at the handle specified:
 tpm2_readpublic -c 0x81010002 -o ek.pub -f pem
 ```
 
+# EK extraction
+See corresponding README in the [ek directory](https://github.com/marcoguerri/swtpm-ek-extract/blob/main/ek/README.md).
